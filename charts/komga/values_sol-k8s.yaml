@@ -1,0 +1,54 @@
+komga:
+  dataStorage:
+    storageClass: local-path-retain
+
+  env:
+    - name: JAVA_TOOL_OPTIONS
+      value: "-Xmx4g"
+    - name: LOGGING_LEVEL_ORG_APACHE_ACTIVEMQ_ARTEMIS_UTILS_CRITICAL
+      value: TRACE
+    - name: LOGGING_LEVEL_ORG_GOTSON_KOMGA
+      value: TRACE
+
+  timezone: America/Vancouver
+
+  volumes:
+    - name: manga
+      nfs:
+        server: 10.5.50.14
+        path: /media/manga
+        readOnly: true
+
+    - name: gocrypt-manga
+      nfs:
+        server: 10.5.50.14
+        path: /gocryptfs-media/manga
+        readOnly: true
+
+  volumeMounts:
+    - name: manga
+      mountPath: /books
+    - name: gocrypt-manga
+      mountPath: /smanga
+
+  ingress:
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+    className: nginx
+    
+    host: m.cloud.browningluke.dev
+    tls:
+      - hosts:
+        - m.cloud.browningluke.dev
+        secretName: komga-cert
+
+  # Restrict to only `k8s1` (for local-path PVC)
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: kubernetes.io/hostname
+                operator: In
+                values:
+                  - k8s1

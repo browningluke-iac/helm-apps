@@ -1,0 +1,23 @@
+# https://kubernetes.io/docs/concepts/services-networking/ingress/
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+  {{- toYaml .Values.komga.ingress.annotations | nindent 4 }}
+  name: komga
+spec:
+  ingressClassName: {{ .Values.komga.ingress.className }}
+  rules:
+    - host: {{ .Values.komga.ingress.host }}
+      http:
+        paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: komga
+              port:
+                number: 80
+  tls:
+  {{- toYaml .Values.komga.ingress.tls | nindent 4 }}
+---
