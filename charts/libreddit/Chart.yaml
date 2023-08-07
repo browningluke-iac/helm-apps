@@ -1,0 +1,4 @@
+apiVersion: v2
+name: libreddit
+description: Deploys libreddit
+version: 0.1.0

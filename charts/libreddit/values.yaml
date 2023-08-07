@@ -1,0 +1,11 @@
+libreddit:
+  image:
+    registry: docker.io
+    repository: libreddit/libreddit
+    tag: latest
+  
+  env:
+    - name: LIBREDDIT_DEFAULT_SHOW_NSFW
+      value: "on"
+    - name: LIBREDDIT_DEFAULT_THEME
+      value: "dracula"
