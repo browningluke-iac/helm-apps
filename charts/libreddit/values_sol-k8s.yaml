@@ -1,0 +1,11 @@
+libreddit:
+  ingress:
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+    className: nginx
+
+    host: libreddit.cloud.browningluke.dev
+    tls:
+      - hosts:
+        - libreddit.cloud.browningluke.dev
+        secretName: libreddit-cert
