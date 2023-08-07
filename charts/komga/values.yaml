@@ -1,0 +1,9 @@
+komga:
+  image:
+    registry: docker.io
+    repository: gotson/komga
+    tag: 1.x
+  
+  dataStorage:
+    # storageClass: <storage class>
+    size: 128Mi # for k3s' local-path-provisioner, size is not enforced, so this value is irrelevant

@@ -1,0 +1,68 @@
+# https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: komga
+spec:
+  selector:
+    matchLabels:
+      app: komga
+  serviceName: "komga"
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: komga
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+        - name: komga
+          image: {{ .Values.komga.image.registry }}/{{ .Values.komga.image.repository }}:{{ .Values.komga.image.tag }}
+          ports:
+            - containerPort: 25600
+              name: app
+          env:
+          {{- toYaml .Values.komga.env | nindent 12 }}
+          livenessProbe:
+            tcpSocket:
+              port: 25600
+            initialDelaySeconds: 5
+            timeoutSeconds: 5
+            successThreshold: 1
+            failureThreshold: 3
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /api/v1/claim
+              port: 25600
+            initialDelaySeconds: 5
+            timeoutSeconds: 2
+            successThreshold: 1
+            failureThreshold: 3
+            periodSeconds: 10
+          volumeMounts:
+          {{- toYaml .Values.komga.volumeMounts | nindent 12 }}
+            - name: komga-data
+              mountPath: /config
+            - name: localtime
+              mountPath: /etc/localtime
+      volumes:
+      {{- toYaml .Values.komga.volumes | nindent 8 }}
+        - name: localtime
+          hostPath:
+            path: /usr/share/zoneinfo/{{ .Values.komga.timezone }}
+      affinity:
+      {{- toYaml .Values.komga.affinity | nindent 8 }}
+  volumeClaimTemplates:
+  - metadata:
+      name: komga-data
+      annotations:
+        volumeType: local
+    spec:
+      storageClassName: {{ .Values.komga.dataStorage.storageClass }}
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: {{ .Values.komga.dataStorage.size }}
+---

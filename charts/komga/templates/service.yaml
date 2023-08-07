@@ -1,0 +1,15 @@
+# https://kubernetes.io/docs/concepts/services-networking/service/
+apiVersion: v1
+kind: Service
+metadata:
+  name: komga 
+spec:
+  selector:
+    app: komga
+  type: ClusterIP
+  ports:
+    - name: app
+      protocol: TCP
+      port: 80
+      targetPort: 25600
+---
