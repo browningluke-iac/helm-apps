@@ -1,0 +1,56 @@
+# https://kubernetes.io/docs/concepts/workloads/controllers/deployment/
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name:  libreddit
+  labels:
+    app: libreddit
+spec:
+  selector:
+    matchLabels:
+      app: libreddit
+  replicas: 1
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: libreddit
+    spec:
+      containers:
+        - name: libreddit
+          image: {{ .Values.libreddit.image.registry }}/{{ .Values.libreddit.image.repository }}:{{ .Values.libreddit.image.tag }}
+          env:
+          {{- toYaml .Values.libreddit.env | nindent 12 }}
+          ports:
+            - containerPort: 8080
+              name: app
+          # resources:
+          #   requests:
+          #     cpu: 50m
+          #     memory: 50Mi
+          #   limits:
+          #     cpu: 250m
+          #     memory: 200Mi
+          livenessProbe:
+            tcpSocket:
+              port: 8080
+            initialDelaySeconds: 5
+            timeoutSeconds: 5
+            successThreshold: 1
+            failureThreshold: 3
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /settings
+              port: 8080
+            initialDelaySeconds: 5
+            timeoutSeconds: 2
+            successThreshold: 1
+            failureThreshold: 3
+            periodSeconds: 10
+      restartPolicy: Always
+---

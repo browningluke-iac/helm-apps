@@ -1,0 +1,23 @@
+# https://kubernetes.io/docs/concepts/services-networking/ingress/
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+  {{- toYaml .Values.libreddit.ingress.annotations | nindent 4 }}
+  name: libreddit
+spec:
+  ingressClassName: {{ .Values.libreddit.ingress.className }}
+  rules:
+  - host: {{ .Values.libreddit.ingress.host }}
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: libreddit
+            port:
+              number: 80
+  tls:
+  {{- toYaml .Values.libreddit.ingress.tls | nindent 4 }}
+---
