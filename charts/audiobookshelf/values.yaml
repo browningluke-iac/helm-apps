@@ -1,0 +1,9 @@
+audiobookshelf:
+  image:
+    registry: docker.io
+    repository: advplyr/audiobookshelf
+    tag: latest
+  
+  dataStorage:
+    # storageClass: <storage class>
+    size: 128Mi # for k3s' local-path-provisioner, size is not enforced, so this value is irrelevant
