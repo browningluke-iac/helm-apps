@@ -1,0 +1,8 @@
+apiVersion: v2
+name: mangathr
+description: Deploys a mangathr/mangathr-legacy cronjob
+version: 0.1.0
+dependencies:
+  - name: postgresql
+    version: v12.8.0
+    repository: https://charts.bitnami.com/bitnami

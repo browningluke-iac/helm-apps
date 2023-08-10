@@ -1,0 +1,15 @@
+# https://kubernetes.io/docs/concepts/storage/persistent-volumes/
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mangathr-legacy
+  annotations:
+    volumeType: local
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: {{ .Values.mangathr_legacy.dataStorage.storageClass }}
+  resources:
+    requests:
+      storage: {{ .Values.mangathr_legacy.dataStorage.size }}
+---
