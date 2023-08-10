@@ -1,0 +1,31 @@
+# https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: mangathr
+spec:
+  schedule: {{ .Values.mangathr.schedule | quote }}
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: mangathr
+              image: {{ .Values.mangathr.image.registry }}/{{ .Values.mangathr.image.repository }}:{{ .Values.mangathr.image.tag }}
+              # mangathr doesn't correctly determine it's in a k8s pod
+              # so it has to manually be told where the config file is.
+              args: ['--config', '/config/config', 'update']
+              volumeMounts:
+              {{- toYaml .Values.mangathr.volumeMounts | nindent 16 }}
+                - name: config
+                  mountPath: /config
+                  readOnly: true
+          volumes:
+            {{- toYaml .Values.mangathr.volumes | nindent 12 }}
+            - name: config
+              configMap:
+                name: mangathr
+          restartPolicy: Never
+      backoffLimit: 3
+  concurrencyPolicy: Forbid
+---

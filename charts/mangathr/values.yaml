@@ -1,0 +1,23 @@
+mangathr:
+  image:
+    registry: ghcr.io
+    repository: browningluke/mangathr
+    tag: main
+
+mangathr_legacy:
+  image:
+    registry: ghcr.io
+    repository: browningluke/mangathr-legacy
+    tag: latest
+  
+  dataStorage:
+    # storageClass: <storage class>
+    size: 128Mi # for k3s' local-path-provisioner, size is not enforced, so this value is irrelevant
+
+postgresql:
+  image:
+    tag: 15.3.0
+  
+  primary:
+    persistence:
+      size: 200Mi # for k3s' local-path-provisioner, size is not enforced, so this value is irrelevant

@@ -1,0 +1,38 @@
+# https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: mangathr-legacy
+spec:
+  schedule: {{ .Values.mangathr_legacy.schedule | quote }}
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: mangathr-legacy
+              image: {{ .Values.mangathr_legacy.image.registry }}/{{ .Values.mangathr_legacy.image.repository }}:{{ .Values.mangathr_legacy.image.tag }}
+              # mangathr-legacy doesn't correctly determine it's in a k8s pod
+              # so it has to manually be told where the DB is.
+              args:
+                - "u"
+                - "--db-path"
+                - "/config/database.sqlite"
+              {{- range .Values.mangathr_legacy.extraArgs }}
+                - {{ . | quote }}
+              {{- end }}
+              volumeMounts:
+              {{- toYaml .Values.mangathr.volumeMounts | nindent 16 }}
+                - name: config
+                  mountPath: /config
+          volumes:
+          {{- toYaml .Values.mangathr_legacy.volumes | nindent 12 }}
+            - name: config
+              persistentVolumeClaim:
+                claimName: mangathr-legacy
+          affinity:
+            {{- toYaml .Values.mangathr_legacy.affinity | nindent 12 }}
+          restartPolicy: Never
+      backoffLimit: 3
+  concurrencyPolicy: Forbid
+---
