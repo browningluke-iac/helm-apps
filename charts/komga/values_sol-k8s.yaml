@@ -15,13 +15,13 @@ komga:
   volumes:
     - name: manga
       nfs:
-        server: 10.5.50.14
+        server: k8s-nas
         path: /media/manga
         readOnly: true
 
     - name: gocrypt-manga
       nfs:
-        server: 10.5.50.14
+        server: k8s-nas
         path: /gocryptfs-media/manga
         readOnly: true
 
