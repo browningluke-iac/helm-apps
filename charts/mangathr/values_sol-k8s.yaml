@@ -1,0 +1,83 @@
+mangathr:
+  schedule: "0 * * * *"
+
+  volumes:
+    - name: ingress
+      nfs:
+        server: k8s-nas
+        path: /ingress/manga
+  
+  volumeMounts:
+    - name: ingress
+      mountPath: /data
+
+  config: |
+    ---
+    logLevel: "INFO"
+    database:
+      driver: postgres
+      createDatabase: true # default: true
+      autoMigrate: true    # default: true
+      postgres:
+        host: mangathr-postgresql
+        password: test1
+        # This database holds 0 important data, 
+        # so this password in plain text is fine.
+    downloader:
+      dryRun: false
+      output:
+        zip: true
+        path: '/data'
+        updatePath: '/data'
+    sources:
+      mangadex:
+        ratingFilter: ["safe", "suggestive", "erotica", "pornographic"]
+
+mangathr_legacy:
+  schedule: "10 * * * *"
+
+  extraArgs:
+    - "--dest"
+    - "/data"
+
+  volumes:
+    - name: ingress
+      nfs:
+        server: k8s-nas
+        path: /ingress/mangathr
+  
+  volumeMounts:
+    - name: ingress
+      mountPath: /data
+
+  dataStorage:
+    storageClass: local-path-retain
+
+  # Restrict to only `k8s1` (for local-path PVC)
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: kubernetes.io/hostname
+                operator: In
+                values:
+                  - k8s1
+
+postgresql:
+  primary:
+    persistence:
+      storageClass: local-path-retain
+      annotations:
+        volumeType: local
+
+    # Restrict to only `k8s1` (for local-path PVC)
+    affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+            - matchExpressions:
+                - key: kubernetes.io/hostname
+                  operator: In
+                  values:
+                    - k8s1
