@@ -1,0 +1,4 @@
+apiVersion: v2
+name: plex
+description: Deploys plex
+version: 0.1.0

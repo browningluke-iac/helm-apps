@@ -1,0 +1,75 @@
+plex:  
+  env:
+    - name: TZ
+      value: America/Vancouver
+    - name: PLEX_CLAIM
+      valueFrom:
+        secretKeyRef:
+          name: plex-claim
+          key: token
+    - name: VERSION
+      value: docker
+
+  # Set a static IP so that Plex knows where to find itself.
+  # This fixes Plex showing up as 'Remote' when it should be 'Local'
+  loadBalancerIP: 10.5.51.2
+
+  dataStorage:
+    storageClass: local-retain-data0 # provision on /mnt/data0
+
+  volumes:
+    - name: audio
+      nfs:
+        server: k8s-nas
+        path: /media/audio
+        readOnly: true
+    - name: photo
+      nfs:
+        server: k8s-nas
+        path: /media/photo
+        readOnly: true
+    - name: video
+      nfs:
+        server: k8s-nas
+        path: /media/video
+        readOnly: true
+    - name: gdrive-vdisk1
+      nfs:
+        server: k8s-nas
+        path: /gdrive-vdisk1/media
+        readOnly: true
+    - name: gocrypt-svideo
+      nfs:
+        server: k8s-nas
+        path: /gocryptfs-media/videos
+        readOnly: true
+    - name: gocrypt-simg
+      nfs:
+        server: k8s-nas
+        path: /gocryptfs-media/images
+        readOnly: true
+
+  volumeMounts:
+    - name: audio
+      mountPath: /data-audio
+    - name: photo
+      mountPath: /data-photo
+    - name: video
+      mountPath: /data
+    - name: gdrive-vdisk1
+      mountPath: /data-gvdisk1
+    - name: gocrypt-svideo
+      mountPath: /svideo
+    - name: gocrypt-simg
+      mountPath: /simg
+
+  # Restrict to only `k8s1` (for PVC)
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: kubernetes.io/hostname
+                operator: In
+                values:
+                  - k8s1
