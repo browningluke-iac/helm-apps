@@ -1,0 +1,6 @@
+excalidraw:
+  image:
+    registry: docker.io
+    repository: excalidraw/excalidraw
+    tag: latest
+  
