@@ -1,0 +1,41 @@
+rimgo:
+  image:
+    tag: 1.2.1
+
+  env:
+    - name: FIBER_PREFORK
+      value: "false"
+    - name: IMGUR_CLIENT_ID
+      value: 546c25a59c58ad7
+    - name: PRIVACY_POLICY
+      value: ""
+    - name: PRIVACY_MESSAGE
+      value: ""
+    - name: PRIVACY_COUNTRY
+      value: ""
+    - name: PRIVACY_PROVIDER
+      value: ""
+    - name: PRIVACY_CLOUDFLARE
+      value: "false"
+    - name: PRIVACY_NOT_COLLECTED
+      value: "false"
+    - name: PRIVACY_IP
+      value: "true"
+    - name: PRIVACY_URL
+      value: "true"
+    - name: PRIVACY_DEVICE
+      value: "true"
+    - name: PRIVACY_DIAGNOSTICS
+      value: "false"
+
+  ingress:
+    className: nginx
+
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+    
+    host: rimgo.cloud.browningluke.dev
+    tls:
+      - hosts:
+        - rimgo.cloud.browningluke.dev
+        secretName: rimgo-cert
