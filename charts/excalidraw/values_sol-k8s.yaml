@@ -1,0 +1,11 @@
+excalidraw:
+  ingress:
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+    className: nginx
+
+    host: draw.cloud.browningluke.dev
+    tls:
+      - hosts:
+        - draw.cloud.browningluke.dev
+        secretName: libreddit-cert
