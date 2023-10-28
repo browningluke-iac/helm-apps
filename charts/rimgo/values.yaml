@@ -1,0 +1,5 @@
+rimgo:
+  image:
+    registry: codeberg.org
+    repository: rimgo/rimgo
+    tag: latest

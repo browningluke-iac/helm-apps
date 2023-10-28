@@ -1,0 +1,23 @@
+# https://kubernetes.io/docs/concepts/services-networking/ingress/
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+  {{- toYaml .Values.rimgo.ingress.annotations | nindent 4 }}
+  name: rimgo
+spec:
+  ingressClassName: {{ .Values.rimgo.ingress.className }}
+  rules:
+  - host: {{ .Values.rimgo.ingress.host }}
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: rimgo
+            port:
+              number: 80
+  tls:
+  {{- toYaml .Values.rimgo.ingress.tls | nindent 4 }}
+---
