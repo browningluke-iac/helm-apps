@@ -8,4 +8,4 @@ excalidraw:
     tls:
       - hosts:
         - draw.cloud.browningluke.dev
-        secretName: libreddit-cert
+        secretName: excalidraw-cert
