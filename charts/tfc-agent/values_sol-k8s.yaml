@@ -1,0 +1,6 @@
+tfc_agent:
+  vault_inject:
+    enabled: true
+    # role: prd
+    env_template: |
+      export TFC_AGENT_TOKEN="{{ .Data.data.TOKEN }}"

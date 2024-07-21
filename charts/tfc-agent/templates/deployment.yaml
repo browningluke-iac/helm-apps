@@ -1,0 +1,47 @@
+# https://kubernetes.io/docs/concepts/workloads/controllers/deployment/
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tfc-agent
+  labels:
+    app: tfc-agent
+spec:
+  selector:
+    matchLabels:
+      app: tfc-agent
+  replicas: 1
+  strategy:
+    # As I'm using TFC's free tier, only
+    # 1 TFC agent may be running at once.
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 100%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: tfc-agent
+      annotations:
+        {{- if .Values.tfc_agent.vault_inject.enabled }}
+        vault.hashicorp.com/agent-inject: 'true'
+        vault.hashicorp.com/role: {{ default .Release.Namespace .Values.tfc_agent.vault_inject.role }}
+        vault.hashicorp.com/agent-inject-secret-config: 'k8s/{{ .Release.Namespace }}/tfc-agent'
+        vault.hashicorp.com/agent-inject-template-config: |
+          {{ "{{" }}- with secret "k8s/{{ .Release.Namespace }}/tfc-agent" -}}
+          {{ .Values.tfc_agent.vault_inject.env_template }}
+          {{ "{{" }}- end }}
+        vault.hashicorp.com/tls-secret: "vault-ca-secret"
+        vault.hashicorp.com/ca-cert: "/vault/tls/ca.crt"
+        {{- end }}
+    spec:
+      containers:
+        - name: tfc-agent
+          image:  {{ .Values.tfc_agent.image.registry }}/{{ .Values.tfc_agent.image.repository }}:{{ .Values.tfc_agent.image.tag }}
+          command:
+            ['sh', '-c']
+          args:
+            ['. /vault/secrets/config && /home/tfc-agent/bin/tfc-agent']
+          resources: {{ toYaml .Values.tfc_agent.resources | nindent 12}}
+      restartPolicy: Always
+      serviceAccountName: tfc-agent
+---

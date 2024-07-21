@@ -1,0 +1,13 @@
+tfc_agent:
+  image:
+    registry: docker.io
+    repository: hashicorp/tfc-agent
+    tag: latest
+
+  resources:
+    requests:
+      cpu: 200m
+      memory: 50Mi
+    limits:
+      cpu: 750m
+      memory: 500Mi
