@@ -1,0 +1,4 @@
+apiVersion: v2
+name: tfc-agent
+description: Deploys a single TFC agent
+version: 0.1.0
