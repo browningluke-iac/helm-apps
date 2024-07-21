@@ -42,6 +42,11 @@ spec:
           args:
             ['. /vault/secrets/config && /home/tfc-agent/bin/tfc-agent']
           resources: {{ toYaml .Values.tfc_agent.resources | nindent 12}}
+          env:
+            - name: TFC_AGENT_SINGLE
+              value: "true"
+            - name: TFC_AGENT_NAME
+              value: {{ .Values.tfc_agent.agent_name }}
       restartPolicy: Always
       serviceAccountName: tfc-agent
 ---
