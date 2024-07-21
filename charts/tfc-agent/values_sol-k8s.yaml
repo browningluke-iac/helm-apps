@@ -1,4 +1,6 @@
 tfc_agent:
+  agent_name: sol-k8s
+
   vault_inject:
     enabled: true
     # role: prd
