@@ -1,7 +1,7 @@
 libreddit:
   image:
-    registry: docker.io
-    repository: libreddit/libreddit
+    registry: quay.io
+    repository: redlib/redlib
     tag: latest
   
   env:
