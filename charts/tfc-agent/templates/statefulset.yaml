@@ -34,7 +34,7 @@ spec:
           command:
             ['sh', '-c']
           args:
-            ['. /vault/secrets/config && /home/tfc-agent/bin/tfc-agent']
+            ['. /vault/secrets/config && exec /home/tfc-agent/bin/tfc-agent']
           resources: {{ toYaml .Values.tfc_agent.resources | nindent 12}}
           env:
             - name: TFC_AGENT_SINGLE
