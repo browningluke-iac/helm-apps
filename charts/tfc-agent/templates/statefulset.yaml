@@ -1,6 +1,6 @@
-# https://kubernetes.io/docs/concepts/workloads/controllers/deployment/
+# https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: tfc-agent
   labels:
@@ -10,13 +10,6 @@ spec:
     matchLabels:
       app: tfc-agent
   replicas: 1
-  strategy:
-    # As I'm using TFC's free tier, only
-    # 1 TFC agent may be running at once.
-    rollingUpdate:
-      maxSurge: 0
-      maxUnavailable: 100%
-    type: RollingUpdate
   template:
     metadata:
       labels:
