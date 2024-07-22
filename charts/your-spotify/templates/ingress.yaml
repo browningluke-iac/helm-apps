@@ -1,0 +1,34 @@
+# https://kubernetes.io/docs/concepts/services-networking/ingress/
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    {{- toYaml .Values.your_spotify.ingress.annotations | nindent 4 }}
+  name: your-spotify
+spec:
+  ingressClassName: {{ .Values.your_spotify.ingress.className }}
+  rules:
+    - host: {{ .Values.your_spotify.ingress.host.server }}
+      http:
+        paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: your-spotify
+              port:
+                number: 8080
+    
+    - host: {{ .Values.your_spotify.ingress.host.web }}
+      http:
+        paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: your-spotify
+              port:
+                number: 3000
+  tls:
+    {{- toYaml .Values.your_spotify.ingress.tls | nindent 4 }}
+---

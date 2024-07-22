@@ -1,0 +1,76 @@
+your_spotify:
+  server:
+    env:
+      - name: API_ENDPOINT
+        value: https://api.spfy.cloud.browningluke.dev # This MUST be included as a valid URL in the spotify dashboard (see below)
+      - name: CLIENT_ENDPOINT
+        value: https://spfy.cloud.browningluke.dev
+      - name: MONGO_ENDPOINT
+        value: mongodb://your-spotify-mongo:27017/your_spotify
+
+  web:    
+    env:
+      - name: API_ENDPOINT
+        value: https://api.spfy.cloud.browningluke.dev
+
+  ingress:
+    className: nginx
+
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+    
+    host:
+      web: spfy.cloud.browningluke.dev
+      server: api.spfy.cloud.browningluke.dev
+    tls:
+      - hosts:
+        - spfy.cloud.browningluke.dev
+        - api.spfy.cloud.browningluke.dev
+        secretName: your-spotify-cert
+
+  vault_inject:
+    enabled: true
+    # role: prd
+    env_template: |
+      export SPOTIFY_PUBLIC="{{ .Data.data.SPOTIFY_PUBLIC }}"
+      export SPOTIFY_SECRET="{{ .Data.data.SPOTIFY_SECRET }}"
+
+mongodb:
+  image:
+    tag: "6.0.13-debian-11-r21"
+
+  architecture: standalone
+  useStatefulSet: true
+  replicaCount: 1
+  
+  # imported db from existing db, so no auth
+  auth:
+    enabled: false
+
+  # Latest v6.x container ("6.0.13-debian-11-r21") has permission issues with file:
+  # root:root /opt/bitnami/mongodb/conf/mongodb.conf
+  # whereas container runs as 1001:1001. Setting fsGroup to 0 fixes this issue.
+  # See: https://github.com/bitnami/charts/issues/24387#issuecomment-2046032007
+  podSecurityContext:
+    fsGroup: 0
+  containerSecurityContext:
+    runAsGroup: 0
+
+  service:
+    nameOverride: your-spotify-mongo
+
+  persistence:
+    size: 200Mi
+    storageClass: local-path-retain
+    annotations:
+      volumeType: local
+
+    affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+            - matchExpressions:
+                - key: kubernetes.io/hostname
+                  operator: In
+                  values:
+                    - k8s1

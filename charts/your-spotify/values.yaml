@@ -1,0 +1,28 @@
+your_spotify:
+  server:
+    image:
+      registry: docker.io
+      repository: yooooomi/your_spotify_server
+      tag: 1.10.1
+    
+    resources:
+      requests:
+        cpu: 5m
+        memory: 50Mi
+      limits:
+        cpu: 750m
+        memory: 200Mi
+
+  web:
+    image:
+      registry: docker.io
+      repository: yooooomi/your_spotify_client
+      tag: 1.10.1
+    
+    resources:
+      requests:
+        cpu: 5m
+        memory: 50Mi
+      limits:
+        cpu: 750m
+        memory: 200Mi

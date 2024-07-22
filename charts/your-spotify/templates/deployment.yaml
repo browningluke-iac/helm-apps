@@ -1,0 +1,101 @@
+# https://kubernetes.io/docs/concepts/workloads/controllers/deployment/
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name:  your-spotify
+  labels:
+    app: your-spotify
+spec:
+  selector:
+    matchLabels:
+      app: your-spotify
+  replicas: 1
+  strategy:
+    # Since your-spotify does not handle HA / multiple replicas,
+    # this prevents multiple instances running at once
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 100%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: your-spotify
+      annotations:
+        {{- if .Values.your_spotify.vault_inject.enabled }}
+        vault.hashicorp.com/agent-inject: 'true'
+        vault.hashicorp.com/role: {{ default .Release.Namespace .Values.your_spotify.vault_inject.role }}
+        vault.hashicorp.com/agent-inject-secret-config: 'k8s/{{ .Release.Namespace }}/your-spotify'
+        vault.hashicorp.com/agent-inject-template-config: |
+          {{ "{{" }}- with secret "k8s/{{ .Release.Namespace }}/your-spotify" -}}
+          {{- .Values.your_spotify.vault_inject.env_template | nindent 10 }}
+          {{- "{{" }}- end }}
+        vault.hashicorp.com/tls-secret: "vault-ca-secret"
+        vault.hashicorp.com/ca-cert: "/vault/tls/ca.crt"
+        {{- end }}
+    spec:
+      containers:
+        - name: your-spotify-server
+          image: {{ .Values.your_spotify.server.image.registry }}/{{ .Values.your_spotify.server.image.repository }}:{{ .Values.your_spotify.server.image.tag }}
+          command:
+            ['sh', '-c']
+          args:
+            ['source /vault/secrets/config && /app/apps/server/scripts/run/run.sh']
+          env:
+          {{- toYaml .Values.your_spotify.server.env | nindent 12 }}
+          ports:
+            - containerPort: 8080
+              name: server
+          resources: {{ toYaml .Values.your_spotify.server.resources | nindent 12}}
+          livenessProbe:
+            tcpSocket:
+              port: 8080
+            initialDelaySeconds: 30
+            timeoutSeconds: 5
+            successThreshold: 1
+            failureThreshold: 3
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 30
+            timeoutSeconds: 2
+            successThreshold: 1
+            failureThreshold: 3
+            periodSeconds: 10
+        
+        - name: your-spotify-web
+          image: {{ .Values.your_spotify.web.image.registry }}/{{ .Values.your_spotify.web.image.repository }}:{{ .Values.your_spotify.web.image.tag }}
+          env:
+          {{- toYaml .Values.your_spotify.web.env | nindent 12 }}
+          ports:
+            - containerPort: 3000
+              name: web
+          resources: {{ toYaml .Values.your_spotify.web.resources | nindent 12}}
+          livenessProbe:
+            tcpSocket:
+              port: 3000
+            initialDelaySeconds: 30
+            timeoutSeconds: 5
+            successThreshold: 1
+            failureThreshold: 3
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 30
+            timeoutSeconds: 2
+            successThreshold: 1
+            failureThreshold: 3
+            periodSeconds: 10
+      restartPolicy: Always
+      serviceAccountName: your-spotify
+      tolerations:
+        - operator: Exists
+        - key: kubernetes.io/arch
+          operator: Equal
+          value: arm64
+          effect: NoSchedule
+---

@@ -1,0 +1,8 @@
+apiVersion: v2
+name: your_spotify
+description: Deploys your-spotify
+version: 0.1.0
+dependencies:
+  - name: mongodb
+    version: v15.6.14
+    repository: https://charts.bitnami.com/bitnami
