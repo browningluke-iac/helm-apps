@@ -57,4 +57,9 @@ spec:
             failureThreshold: 3
             periodSeconds: 10
       restartPolicy: Always
+      tolerations:
+        - key: kubernetes.io/arch
+          operator: Equal
+          value: arm64
+          effect: NoSchedule
 ---
