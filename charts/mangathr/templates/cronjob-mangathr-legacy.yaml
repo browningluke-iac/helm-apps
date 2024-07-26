@@ -22,7 +22,7 @@ spec:
                 - {{ . | quote }}
               {{- end }}
               volumeMounts:
-              {{- toYaml .Values.mangathr.volumeMounts | nindent 16 }}
+              {{- toYaml .Values.mangathr_legacy.volumeMounts | nindent 16 }}
                 - name: config
                   mountPath: /config
           volumes:
