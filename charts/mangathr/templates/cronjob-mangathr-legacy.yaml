@@ -16,20 +16,19 @@ spec:
               # so it has to manually be told where the DB is.
               args:
                 - "u"
-                - "--db-path"
-                - "/config/database.sqlite"
+                - "--database"
+                - "psql"
               {{- range .Values.mangathr_legacy.extraArgs }}
                 - {{ . | quote }}
               {{- end }}
               volumeMounts:
-              {{- toYaml .Values.mangathr.volumeMounts | nindent 16 }}
+              {{- toYaml .Values.mangathr_legacy.volumeMounts | nindent 16 }}
                 - name: config
                   mountPath: /config
+              env:
+              {{- toYaml .Values.mangathr_legacy.env | nindent 16 }}
           volumes:
           {{- toYaml .Values.mangathr_legacy.volumes | nindent 12 }}
-            - name: config
-              persistentVolumeClaim:
-                claimName: mangathr-legacy
           affinity:
             {{- toYaml .Values.mangathr_legacy.affinity | nindent 12 }}
           restartPolicy: Never
