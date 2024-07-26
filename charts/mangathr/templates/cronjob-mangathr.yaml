@@ -17,14 +17,8 @@ spec:
               args: ['--config', '/config/config', 'update']
               volumeMounts:
               {{- toYaml .Values.mangathr.volumeMounts | nindent 16 }}
-                - name: config
-                  mountPath: /config
-                  readOnly: true
           volumes:
             {{- toYaml .Values.mangathr.volumes | nindent 12 }}
-            - name: config
-              configMap:
-                name: mangathr
           restartPolicy: Never
           tolerations:
             - key: kubernetes.io/arch
