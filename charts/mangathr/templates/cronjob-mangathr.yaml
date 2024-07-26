@@ -26,6 +26,11 @@ spec:
               configMap:
                 name: mangathr
           restartPolicy: Never
+          tolerations:
+            - key: kubernetes.io/arch
+              operator: Equal
+              value: arm64
+              effect: NoSchedule
       backoffLimit: 3
   concurrencyPolicy: Forbid
 ---

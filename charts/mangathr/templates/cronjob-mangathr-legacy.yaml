@@ -33,6 +33,11 @@ spec:
           affinity:
             {{- toYaml .Values.mangathr_legacy.affinity | nindent 12 }}
           restartPolicy: Never
+          tolerations:
+            - key: kubernetes.io/arch
+              operator: Equal
+              value: arm64
+              effect: NoSchedule
       backoffLimit: 3
   concurrencyPolicy: Forbid
 ---
