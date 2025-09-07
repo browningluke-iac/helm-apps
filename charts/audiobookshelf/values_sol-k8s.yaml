@@ -1,44 +1,39 @@
-audiobookshelf:
-  dataStorage:
-    storageClass: local-path-retain   
+persistence:
+  enabled: true
+  storageClass: longhorn-retain
+  size: 1Gi
 
-  volumes:
-    - name: books
-      nfs:
-        server: 10.5.50.14
-        path: /media/books
-        readOnly: true
+backup:
+  enabled: true
+  storageClass: nfs-backups
+  storage: 500Mi # Not respected by the nfs csi driver
 
-    - name: audiobooks
-      nfs:
-        server: 10.5.50.14
-        path: /media/audio/audiobooks
-        readOnly: true
+extraVolumes:
+  - name: books
+    nfs:
+      server: 10.5.50.14
+      path: /media/books
+      readOnly: true
 
-  volumeMounts:
-    - name: books
-      mountPath: /books
-    - name: audiobooks
-      mountPath: /audiobooks
+  - name: audiobooks
+    nfs:
+      server: 10.5.50.14
+      path: /media/audio/audiobooks
+      readOnly: true
 
-  ingress:
-    annotations:
-      cert-manager.io/cluster-issuer: letsencrypt-prod
-    className: nginx
-    
-    host: books.cloud.browningluke.dev
-    tls:
-      - hosts:
-        - books.cloud.browningluke.dev
-        secretName: audiobookshelf-cert
+volumeMounts:
+  - name: books
+    mountPath: /books
+  - name: audiobooks
+    mountPath: /audiobooks
 
-  # Restrict to only `k8s1` (for local-path PVC)
-  affinity:
-    nodeAffinity:
-      requiredDuringSchedulingIgnoredDuringExecution:
-        nodeSelectorTerms:
-          - matchExpressions:
-              - key: kubernetes.io/hostname
-                operator: In
-                values:
-                  - k8s1
+ingress:
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+  className: nginx
+  
+  host: books.cloud.browningluke.dev
+  tls:
+    - hosts:
+      - books.cloud.browningluke.dev
+      secretName: audiobookshelf-cert
