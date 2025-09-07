@@ -33,21 +33,6 @@ plex:
         server: k8s-nas
         path: /media/video
         readOnly: true
-    - name: gdrive-vdisk1
-      nfs:
-        server: k8s-nas
-        path: /gdrive-vdisk1/media
-        readOnly: true
-    - name: gocrypt-svideo
-      nfs:
-        server: k8s-nas
-        path: /gocryptfs-media/videos
-        readOnly: true
-    - name: gocrypt-simg
-      nfs:
-        server: k8s-nas
-        path: /gocryptfs-media/images
-        readOnly: true
 
   volumeMounts:
     - name: audio
@@ -58,10 +43,33 @@ plex:
       mountPath: /data
     - name: gdrive-vdisk1
       mountPath: /data-gvdisk1
-    - name: gocrypt-svideo
+      subPath: media
+    - name: crypt-media
       mountPath: /svideo
-    - name: gocrypt-simg
+      subPath: videos
+    - name: crypt-media
       mountPath: /simg
+      subPath: images
+
+  volumeClaims:
+    - metadata:
+        name: crypt-media
+      spec:
+        storageClassName: smb-crypt-media
+        accessModes:
+        - ReadOnlyMany
+        resources:
+          requests:
+            storage: 1Ki
+    - metadata:
+        name: gdrive-vdisk1
+      spec:
+        storageClassName: smb-gdrive-vdisk1
+        accessModes:
+        - ReadOnlyMany
+        resources:
+          requests:
+            storage: 1Ki
 
   # Restrict to only `k8s1` (for PVC)
   affinity:

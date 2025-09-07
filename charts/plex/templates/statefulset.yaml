@@ -73,6 +73,7 @@ spec:
       affinity:
       {{- toYaml .Values.plex.affinity | nindent 8 }}
   volumeClaimTemplates:
+  {{- toYaml .Values.plex.volumeClaims | nindent 2 }}
   - metadata:
       name: plex-data
       annotations:
