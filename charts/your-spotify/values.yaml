@@ -3,7 +3,7 @@ your_spotify:
     image:
       registry: docker.io
       repository: yooooomi/your_spotify_server
-      tag: 1.10.1
+      tag: 1.14.0
     
     resources:
       requests:
@@ -17,7 +17,7 @@ your_spotify:
     image:
       registry: docker.io
       repository: yooooomi/your_spotify_client
-      tag: 1.10.1
+      tag: 1.14.0
     
     resources:
       requests:
