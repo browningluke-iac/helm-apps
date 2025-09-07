@@ -1,0 +1,43 @@
+n8n:
+  ingress:
+    enabled: true
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+    hosts:
+      - host: n8n.cloud.browningluke.dev
+        paths:
+          - /
+    tls:
+     - secretName: n8n-cert
+       hosts:
+         - n8n.cloud.browningluke.dev
+
+    className: "nginx"
+
+  main:
+    persistence:
+      enabled: true
+      type: dynamic
+      size: 1Gi
+      storageClass: longhorn-retain
+
+    extraEnv:
+      N8N_BLOCK_FILE_ACCESS_TO_N8N_FILES:
+        value: "false"
+
+    resources:
+      limits:
+        cpu: 150m
+        memory: 256Mi
+      requests:
+        cpu: 100m
+        memory: 128Mi
+
+    livenessProbe:
+      initialDelaySeconds: 45
+
+    lifecycle:
+      postStart:
+        exec:
+          command: ["/bin/sh", "-c",
+            "mkdir -p ./.n8n/workflow-data/ && chmod -R a+rw ./.n8n/workflow-data/ && ln -s ./.n8n/workflow-data/ /home/node/workflow-data"]
