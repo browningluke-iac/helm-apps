@@ -1,9 +1,82 @@
-audiobookshelf:
-  image:
-    registry: docker.io
-    repository: advplyr/audiobookshelf
-    tag: latest
-  
-  dataStorage:
-    # storageClass: <storage class>
-    size: 128Mi # for k3s' local-path-provisioner, size is not enforced, so this value is irrelevant
+image:
+  registry: docker.io
+  repository: advplyr/audiobookshelf
+  tag: latest
+  pullPolicy: IfNotPresent
+
+persistence:
+  enabled: true
+  storageClass: "-"
+  accessModes: ["ReadWriteOnce"]
+  size: 2Gi
+  annotations: {}
+  labels: {}
+  config:
+    mountPath: /config
+    subPath: config
+  metadata:
+    mountPath: /metadata
+    subPath: metadata 
+
+backup:
+  enabled: false
+  storageClass: "-"
+  accessModes: ["ReadWriteOnce"]
+  size: 8Gi
+  annotations: {}
+  labels: {}
+  mountPath: "/backups"
+  subPath: ""
+
+ingress:
+  enabled: false
+  annotations: {}
+  className: ""
+
+  host: ""
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+service:
+  type: ClusterIP
+  port: 80
+  annotations: {}
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 50Mi
+  limits:
+    cpu: 200m
+    memory: 150Mi
+
+affinity: {}
+
+tolerations: []
+
+extraVolumes: []
+
+extraEnv: []
+
+lifecycle: {}
+
+livenessProbe:
+  tcpSocket:
+    port: 80
+  initialDelaySeconds: 30
+  timeoutSeconds: 5
+  successThreshold: 1
+  failureThreshold: 3
+  periodSeconds: 10
+
+readinessProbe:
+  httpGet:
+    path: /healthcheck
+    port: 80
+  initialDelaySeconds: 30
+  timeoutSeconds: 2
+  successThreshold: 1
+  failureThreshold: 3
+  periodSeconds: 10

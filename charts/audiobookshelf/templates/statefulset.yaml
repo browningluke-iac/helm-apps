@@ -2,64 +2,85 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: audiobookshelf
+  name: {{ .Chart.Name }}
 spec:
   selector:
     matchLabels:
-      app: audiobookshelf
-  serviceName: "audiobookshelf"
+      app: {{ .Chart.Name }}
+  serviceName: {{ .Chart.Name }}
   replicas: 1
   template:
     metadata:
       labels:
-        app: audiobookshelf
+        app: {{ .Chart.Name }}
     spec:
       terminationGracePeriodSeconds: 10
       containers:
-        - name: audiobookshelf
-          image: {{ .Values.audiobookshelf.image.registry }}/{{ .Values.audiobookshelf.image.repository }}:{{ .Values.audiobookshelf.image.tag }}
+        - name: {{ .Chart.Name }}
+          image: {{ .Values.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+          {{- toYaml .Values.extraEnv | nindent 12 }}
+          lifecycle:
+          {{- toYaml .Values.lifecycle | nindent 12 }}
           ports:
             - containerPort: 80
               name: app
+          resources: {{ toYaml .Values.resources | nindent 12}}
           livenessProbe:
-            tcpSocket:
-              port: 80
-            initialDelaySeconds: 5
-            timeoutSeconds: 5
-            successThreshold: 1
-            failureThreshold: 3
-            periodSeconds: 10
+          {{- toYaml .Values.livenessProbe | nindent 12 }}
           readinessProbe:
-            httpGet:
-              path: /healthcheck
-              port: 80
-            initialDelaySeconds: 5
-            timeoutSeconds: 2
-            successThreshold: 1
-            failureThreshold: 3
-            periodSeconds: 10
+          {{- toYaml .Values.readinessProbe | nindent 12 }}
           volumeMounts:
-          {{- toYaml .Values.audiobookshelf.volumeMounts | nindent 12 }}
-            - name: audiobookshelf-data
-              mountPath: /config
-              subPath: config
-            - name: audiobookshelf-data
-              mountPath: /metadata
-              subPath: metadata
+          {{- toYaml .Values.volumeMounts | nindent 12 }}
+            - name: {{ .Chart.Name }}-data
+              mountPath: {{ .Values.persistence.config.mountPath }}
+              subPath: {{ .Values.persistence.config.subPath }}
+            - name: {{ .Chart.Name }}-data
+              mountPath: {{ .Values.persistence.metadata.mountPath }}
+              subPath: {{ .Values.persistence.metadata.subPath }}
+          {{- if .Values.backup.enabled }}
+            - name: {{ .Chart.Name }}-backups
+              mountPath: {{ .Values.backup.mountPath }}
+              subPath: {{ .Values.backup.subPath }}
+          {{- end }}
       volumes:
-      {{- toYaml .Values.audiobookshelf.volumes | nindent 8 }}
+      {{- toYaml .Values.extraVolumes | nindent 8 }}
       affinity:
-      {{- toYaml .Values.audiobookshelf.affinity | nindent 8 }}
+      {{- toYaml .Values.affinity | nindent 8 }}
+      tolerations:
+      {{- toYaml .Values.tolerations | nindent 8 }}
   volumeClaimTemplates:
   - metadata:
-      name: audiobookshelf-data
+      name: {{ .Chart.Name }}-data
       annotations:
-        volumeType: local
+        {{ .Values.persistence.annotations | toYaml | nindent 8 }}
+      labels:
+        {{ .Values.persistence.labels | toYaml | nindent 8 }}
     spec:
-      storageClassName: {{ .Values.audiobookshelf.dataStorage.storageClass }}
+      storageClassName: {{ .Values.persistence.storageClass }}
       accessModes:
-      - ReadWriteOnce
+        {{- range .Values.persistence.accessModes }}
+        - {{ . | quote }}
+        {{- end }}
       resources:
         requests:
-          storage: {{ .Values.audiobookshelf.dataStorage.size }}
+          storage: {{ .Values.persistence.size }}
+  {{- if .Values.backup.enabled }}
+  - metadata:
+      name: {{ .Chart.Name }}-backups
+      annotations:
+        {{ .Values.backup.annotations | toYaml | nindent 8 }}
+      labels:
+        {{ .Values.backup.labels | toYaml | nindent 8 }}
+    spec:
+      storageClassName: {{ .Values.backup.storageClass }}
+      accessModes:
+        {{- range .Values.backup.accessModes }}
+        - {{ . | quote }}
+        {{- end }}
+      resources:
+        requests:
+          storage: {{ .Values.backup.size }}
+  {{- end }}
 ---
